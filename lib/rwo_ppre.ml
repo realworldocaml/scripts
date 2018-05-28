@@ -349,7 +349,7 @@ let extract_code_from_1e_exn chapter =
   in
 
   let write_imports () : unit Deferred.t =
-    Map.to_alist !imports
+    Import.Map.to_alist !imports
     |> Deferred.List.iter ~f:(fun (i,blk) ->
       let out_file = code_dir/i.Import.href in
       let contents =
@@ -363,11 +363,11 @@ let extract_code_from_1e_exn chapter =
 
   let f (x:t) : Html.item =
     let i:Import.t = ok_exn (to_import x) in
-    (if Map.mem !imports i then
+    (if Import.Map.mem !imports i then
         printf "WARNING: duplicate import for file %s part %S\n"
           i.href (match i.part with Some x -> x | None -> "")
      else
-        imports := Map.add !imports ~key:i ~data:x.pre.code_block;
+        imports := Import.Map.add !imports ~key:i ~data:x.pre.code_block;
     );
     Import.to_html i
   in
