@@ -57,7 +57,7 @@ end = struct
         loop (loop accum childs) html
     in
     loop [] html |>
-    List.dedup
+    List.dedup_and_sort ~compare:(Pervasives.compare)
 
   let of_chapter file =
     Html.of_file file >>| of_chapter_html
