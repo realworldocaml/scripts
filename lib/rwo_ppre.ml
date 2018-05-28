@@ -363,11 +363,10 @@ let extract_code_from_1e_exn chapter =
 
   let f (x:t) : Html.item =
     let i:Import.t = ok_exn (to_import x) in
-    (if Import.Map.mem !imports i then
-        printf "WARNING: duplicate import for file %s part %S\n"
+    (match Import.Map.add !imports ~key:i ~data:x.pre.code_block with
+    | `Duplicate -> printf "WARNING: duplicate import for file %s part %S\n"
           i.href (match i.part with Some x -> x | None -> "")
-     else
-        imports := Import.Map.add !imports ~key:i ~data:x.pre.code_block;
+    | `Ok imports' -> imports := imports'
     );
     Import.to_html i
   in
