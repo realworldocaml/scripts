@@ -285,7 +285,7 @@ let add_script t lang ~run_nondeterministic ~filename =
 let of_html ?(code_dir="examples") ~run_nondeterministic ~filename html =
   let imports =
     Import.find_all html
-    |> List.dedup ~compare:(fun i j -> compare i.Import.href j.Import.href)
+    |> List.dedup_and_sort ~compare:(fun i j -> compare i.Import.href j.Import.href)
   in
   Deferred.Or_error.List.fold imports ~init:empty ~f:(fun accum i ->
       add_script accum (Import.lang_of i |> ok_exn)
