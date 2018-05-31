@@ -57,20 +57,10 @@ end = struct
         loop (loop accum childs) html
     in
     loop [] html |>
-    List.dedup
+    List.dedup_and_sort ~compare:(Pervasives.compare)
 
   let of_chapter file =
     Html.of_file file >>| of_chapter_html
-
-end
-
-module Param = struct
-  open Command.Spec
-
-  let repo_root =
-    let default = "./" in
-    let doc = sprintf "dir Root of repository. Default: \"%s\"." default in
-    flag "-repo-root" (optional_with_default default file) ~doc
 
 end
 
@@ -78,23 +68,28 @@ end
 (******************************************************************************)
 (* `deps` command                                                             *)
 (******************************************************************************)
-let deps_site : Command.t = Command.async
+let deps_site : Command.t = 
+    let open Async.Command.Let_syntax in
+    Command.async
     ~summary:"print build dependencies for site files"
-    Command.Spec.(
-      empty
-      +> Param.repo_root
-    )
-    (fun repo_root () ->
-       Html.chapter_files repo_root >>=
-       Deferred.List.iter ~f:(fun chapter_file ->
-           (
-             Deps.of_chapter (repo_root/"book"/chapter_file) >>| fun l ->
-             List.map l ~f:(fun x -> "examples"/x) |> fun l ->
-             String.concat l ~sep:" "
-           ) >>| fun dependencies ->
-           printf "site/%s: %s\n\n" chapter_file dependencies
-         )
-    )
+    [%map_open
+      let repo_root =
+        Async.Command.Param.(let default = "./" in
+        let doc = sprintf "dir Root of repository. Default: \"%s\"." default in
+        flag "-repo-root" (optional_with_default default file) ~doc)
+        in
+        (fun () ->
+           Html.chapter_files repo_root >>=
+           Deferred.List.iter ~f:(fun chapter_file ->
+               (
+                 Deps.of_chapter (repo_root/"book"/chapter_file) >>| fun l ->
+                 List.map l ~f:(fun x -> "examples"/x) |> fun l ->
+                 String.concat l ~sep:" "
+               ) >>| fun dependencies ->
+               printf "site/%s: %s\n\n" chapter_file dependencies
+             )
+        )
+    ]
 
 let deps : Command.t = Command.group
     ~summary:"print build dependencies"
