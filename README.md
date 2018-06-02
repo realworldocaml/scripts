@@ -1,3 +1,5 @@
+## Deprecated: These scripts are no longer in use for RWO ##
+
 These scripts form the compilation pipeline for Real World OCaml.  They aren't
 really designed to be useful outside of the book toolchain, but the plan is to
 factor out the useful bits eventually.
